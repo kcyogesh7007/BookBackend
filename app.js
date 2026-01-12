@@ -1,11 +1,34 @@
 const express = require("express");
+const { books } = require("./database/connection");
 const app = express();
 
 require("./database/connection");
 
-app.get("/", (req, res) => {
+app.use(express.json());
+
+app.get("/books", async (req, res) => {
+  const allBook = await books.findAll();
   res.json({
-    message: "Api is live",
+    message: "Books fetched successfully",
+    data: allBook,
+  });
+});
+
+app.post("/books", async (req, res) => {
+  const { bookName, bookPrice, bookAuthor, bookGenre } = req.body;
+  if (!bookName || !bookPrice || !bookAuthor || !bookGenre) {
+    return res.status(400).json({
+      message: "please provide bookName,bookPrice,bookAuthor and bookGenre",
+    });
+  }
+  await books.create({
+    bookName,
+    bookPrice,
+    bookAuthor,
+    bookGenre,
+  });
+  res.status(201).json({
+    message: "Book added successfully",
   });
 });
 
